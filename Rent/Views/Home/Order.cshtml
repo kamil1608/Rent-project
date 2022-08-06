@@ -1,0 +1,224 @@
+﻿@model Rent.Models.ViewModels.EditOrderViewModel
+
+@{
+    ViewBag.Title = Model.Heading;
+}
+
+
+<link href="@Url.Content("~/Content/Order.css")" rel="stylesheet" type="text/css" />
+
+
+<h1 class="mb-5 text-center"> @Model.Heading </h1>
+
+@if (Model.Order.Id != 0)
+{
+    <button class="btn btn-primary mb-3"
+            onclick='window.location.href = "@Url.Action("OrderItem", "Home", new { orderId = Model.Order.Id })"'>
+
+        Dodaj produkt
+    </button>
+
+    <button class="btn btn-primary mb-3" onclick="generatePdf()">
+        Utwórz PDF
+    </button>
+
+}
+
+
+<div class="row">
+    <div class="col-lg-6">
+        @using (Html.BeginForm("Order", "Home"))
+        {
+
+            //@Html.ValidationSummary()
+
+
+            if (Model.Order.Id == 0)
+            {
+                <p class="alert alert-danger mt-4 mb-4 text-center">
+                    Pola tytuł, klient, metoda płatności i termin realizacji zamówienia są
+                    <strong>wymagane</strong>
+                </p>
+            }
+
+            @Html.HiddenFor(x => x.Order.Id)
+            @Html.HiddenFor(x => x.Order.UserId)
+            //@Html.HiddenFor(x => x.Invoice.CreatedDate)
+
+            <div class="form-group">
+                @Html.LabelFor(x => x.Order.Title, new { @class = "mb-1" })
+                @Html.TextBoxFor(x => x.Order.Title,
+               new { @class = "form-control", autofocus = "autofocus" })
+                @Html.ValidationMessageFor(x => x.Order.Title)
+            </div>
+
+            <div class="form-group mt-3">
+                @Html.LabelFor(x => x.Order.ClientId, new { @class = "mb-1" })
+                @Html.DropDownListFor(x => x.Order.ClientId,
+               new SelectList(Model.Clients, "Id", "Name"),
+               "-- Wybierz klienta --",
+               new { @class = "form-control" })
+                @Html.ValidationMessageFor(x => x.Order.ClientId)
+            </div>
+
+            if (Model.Order.Id != 0)
+            {
+                <div class="form-group mt-3">
+                    @Html.LabelFor(x => x.Order.Value, new { @class = "mb-1" })
+                    @Html.TextBoxFor(x => x.Order.Value,
+                   new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            }
+
+            <div class="form-group mt-3">
+                @Html.LabelFor(x => x.Order.MethodOfPaymentId,new { @class = "mb-1" })
+                @Html.DropDownListFor(x => x.Order.MethodOfPaymentId,
+               new SelectList(Model.MethodOfPayments, "Id", "Name"),
+               "-- Wybierz sposób płatności --",
+               new { @class = "form-control" })
+                @Html.ValidationMessageFor(x => x.Order.MethodOfPaymentId)
+            </div>
+
+            <div class="form-group mt-3">
+                @Html.LabelFor(x => x.Order.PaymentDeadline,new { @class = "mb-1" })
+                @Html.TextBoxFor(x => x.Order.PaymentDeadline, "{0:dd-MM-yyyy}",
+               new { @class = "form-control", @id = "PaymentDeadline", autocomplete = "off" })
+                @Html.ValidationMessageFor(x => x.Order.PaymentDeadline)
+            </div>
+
+            <div class="form-group mt-3">
+                @Html.LabelFor(x => x.Order.Comments, new { @class = "mb-1" })
+                @Html.TextAreaFor(x => x.Order.Comments,
+               new { @class = "form-control" })
+                @Html.ValidationMessageFor(x => x.Order.Comments)
+            </div>
+            
+            <div class="buttonSubmit">
+                <button class="btn btn-primary btn-lg mb-5 mt-4" type="submit">
+                    Zapisz
+                </button>
+            </div>
+
+
+
+        }
+    </div>
+
+    <div class="col-5 offset-lg-1">
+        @if (Model.Order.Id != 0)
+        {
+            @Html.Partial("_OrderItem", Model.Order.OrderItems)
+        }
+    </div>
+
+</div>
+
+
+
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+
+        function generatePdf()
+        {
+             $.ajax({
+                type: 'POST',
+                url: "@Url.Action("OrderToPdf", "Print")",
+                data: {
+                    id: '@Model.Order.Id'
+                },
+                success: function (data) {
+                    window.location = '@Url.Action("DownloadOrderPdf", "Print")' + '?fileGuid=' + data.FileGuid + '&fileName=' + data.FileName;
+
+                },
+                error: function (data) {
+                    alert(data.Message);
+                },
+                dataType: 'json',
+                cache: false
+            });
+        }
+
+
+
+
+
+
+
+        function deleteInvoicePosition(id, orderId, btn) {
+                if (!confirm("Czy na pewno chcesz usunąć pozycję"))
+                return;
+
+
+            $.ajax({
+                type: 'POST',
+                url: "@Url.Action("DeleteOrder", "Home")",
+                data: {
+                    id: id,
+                    orderId: orderId
+                },
+                success: function (data) {
+                    if (data.Success) {
+                        var row = btn.parentNode.parentNode;
+                        row.parentNode.removeChild(row);
+
+                        var orderVal = data.InvoiceValue;
+
+                        $('#Order_Value').val(orderVal.toFixed(2).replace(".", ","));
+
+
+                    } else {
+                        alert(data.Message);
+                    }
+                },
+                error: function (data) {
+                    alert(data.Message);
+                },
+                dataType: 'json'
+
+            });
+
+        }
+
+
+        $(document).ready(function () {
+
+            $.validator.methods.number = function (value, element) {
+                return this.optional(element) || /^-?(?:\d+|\d{1,3}(?:[\s\.,]\d{3})+)(?:[\.,]\d+)?$/.test(value);
+            }
+
+            $.validator.methods.date = function (value, element) {
+                var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+                var isFirefox = /Firefox/.test(navigator.userAgent);
+                if (isChrome || isFirefox) {
+                    var d = new Date();
+                    return this.optional(element) || !/Invalid|NaN/.test(new Date(d.toLocaleDateString(value)));
+                } else {
+                    return this.optional(element) || !/Invalid|NaN/.test(new Date(value));
+                }
+            }
+
+
+
+            $('#PaymentDeadline').datepicker({
+                format: "dd-mm-yyyy",
+                language: "pl",
+                multidate: false,
+                autoclose: true,
+                todayHighlight: true,
+                forceParse: false
+            });
+
+        });
+
+
+    </script>
+}
+
+
+
+
+

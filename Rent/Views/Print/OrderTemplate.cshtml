@@ -1,0 +1,131 @@
+﻿@model Rent.Models.Domains.Order
+
+<link href="@Url.Content("~/Content/PrintOrder.css")" rel="stylesheet" type="text/css" />
+
+<div class="container order-font">
+
+    <div class="row order-font">
+        <div class="col-12 header-font mt-3">
+            <div> <h1>Zamówienie @Model.Title</h1></div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-4">
+            <div class="top-small-caption">
+                Sprzedawca:
+            </div>
+            <div class="bottom-linie">
+                <div>@Model.User.Name</div>
+            </div>
+            <div class="top-small-caption">Imię i nazwisko sprzedającego</div>
+
+            <div class="bottom-linie">
+                <div>ul. @Model.User.Address.Street @Model.User.Address.Code @Model.User.Address.City</div>
+            </div>
+            <div class="top-small-caption">Ulica, kod pocztowy, miejscowość</div>
+
+            <div class="bottom-linie">
+                <div>@Model.User.Email</div>
+            </div>
+            <div class="top-small-caption">Adress e-mail</div>
+
+        </div>
+
+        <div class="col-4 offset-4">
+            <div class="top-small-caption">
+                Kupujący:
+            </div>
+            <div class="bottom-linie">
+                <div>@Model.Client.Name</div>
+            </div>
+            <div class="top-small-caption">Imię i nazwisko sprzedającego</div>
+
+            <div class="bottom-linie">
+                <div>ul. @Model.Client.Address.Street @Model.Client.Address.Code @Model.User.Address.City</div>
+            </div>
+            <div class="top-small-caption">Ulica, kod pocztowy, miejscowość</div>
+
+            <div class="bottom-linie">
+                <div>@Model.Client.Email</div>
+            </div>
+            <div class="top-small-caption">Adress e-mail</div>
+
+        </div>
+    </div>
+
+
+    <div class="row mt-5">
+
+        <div class="col-2">
+
+        </div>
+
+        <div class="col-8">
+
+        </div>
+
+        <div class="col-2">
+
+        </div>
+
+    </div>
+
+
+
+    <table class="table table-bordered mt-5">
+        <thead class="table-head">
+            <tr>
+                <th><strong>Lp</strong></th>
+                <th><strong>Produkt</strong></th>
+                <th><strong>Ilość</strong></th>
+                <th><strong>Wartość</strong></th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model.OrderItems)
+            {
+                <tr>
+                    <td>@item.Lp</td>
+                    <td>@item.Product.Name</td>
+                    <td>@item.Number</td>
+                    <td>@item.Value</td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="text-left">Całkowita wartość zamówienia wynosi @Model.Value zł</div>
+            <div class="text-left">Wybrana metoda płatności: @Model.MethodOfPayment.Name </div>
+            @if (!string.IsNullOrWhiteSpace(Model.Comments))
+            {
+                <div class="text-left"> Uwagi: @Model.Comments  </div>
+            }
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-2"></div>
+        <div class="col-3">
+
+            <div>@Model.User.Name</div>
+            <br />
+            <div class="bottom-linie"></div>
+            <div class="top-small-caption">Podpis</div>
+        </div>
+        <div class="col-3 offset-2">
+
+            <div>@Model.Client.Name</div>
+            <br />
+            <div class="bottom-linie"></div>
+            <div class="top-small-caption">Podpis</div>
+        </div>
+        <div class="col-2"></div>
+
+    </div>
+
+</div>

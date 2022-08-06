@@ -1,0 +1,11 @@
+﻿body {
+}
+
+.buttonSubmit {
+    max-width: 400px;
+    text-align: center;
+}
+
+.form-control {
+    max-width: 400px;
+}

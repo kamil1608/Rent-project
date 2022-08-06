@@ -1,0 +1,30 @@
+﻿body {
+    
+}
+
+nav, footer {
+    display: none !important;
+}
+
+input {
+   max-width: 500px;
+}
+
+btn{
+    max-width: 500px;
+}
+
+h4 {
+    text-align: center;
+}
+
+hr{
+    display: none;
+}
+
+.form-horizontal
+{
+    width: 225px;
+}
+
+
